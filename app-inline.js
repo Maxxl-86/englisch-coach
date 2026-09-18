@@ -1,5 +1,5 @@
 // Vokabeltrainer – Auto-Repair Blocks + UX + Tippfehler-Diff + Lern-Hinweise (Beta)
-const APP_VERSION = 'v27'; // <--- AKTUALISIERT AUF V12
+const APP_VERSION = 'v28'; // <--- AKTUALISIERT AUF V12
 const UNIT_META = [
 // ... (UNIT_META bleibt unverändert) ...
 // ... (Hilfsfunktionen bleiben unverändert) ...
@@ -79,6 +79,16 @@ function acceptedAnswers(answer){
 function isAcceptedAnswer(userInput, answer){
   const user = answerNorm(userInput);
   return acceptedAnswers(answer).includes(user);
+}
+function combineAcceptedAnswers(primary, alternatives){
+  const values = [
+    primary,
+    ...(Array.isArray(alternatives) ? alternatives : [])
+  ]
+    .map(value => String(value || '').trim())
+    .filter(Boolean);
+
+  return [...new Set(values)].join('; ');
 }
 
 function displayAnswer(answer){
@@ -218,12 +228,27 @@ function saveSync(m){
 function loadPlayer(){
 
     try{
-    return JSON.parse(
-    localStorage.getItem(LS_PLAYER)
-|| '{"xp":0,"correctAnswers":0,"cardPacks":0,"ownedCards":[]}'
-);
+        const player = JSON.parse(
+            localStorage.getItem(LS_PLAYER) ||
+            '{"xp":0,"correctAnswers":0,"cardPacks":0,"ownedCards":[]}'
+        );
+
+        player.xp = Number(player.xp) || 0;
+        player.correctAnswers = Number(player.correctAnswers) || 0;
+        player.cardPacks = Math.max(0, Number(player.cardPacks) || 0);
+        player.ownedCards = Array.isArray(player.ownedCards)
+            ? player.ownedCards
+            : [];
+
+        return player;
+
     }catch(e){
-        return {xp:0};
+        return {
+            xp: 0,
+            correctAnswers: 0,
+            cardPacks: 0,
+            ownedCards: []
+        };
     }
 }
 
@@ -517,83 +542,54 @@ const html =
 
 function openCardPack(){
 
-   
-    const player =
-        loadPlayer();
+    const player = loadPlayer();
+    const availablePacks = Math.max(0, Number(player.cardPacks) || 0);
 
-    if(
-        !player.cardPacks ||
-        player.cardPacks <= 0
-    ){
+    if(availablePacks <= 0){
+        updatePlayerUI();
+        alert('Keine Kartenpacks vorhanden.');
+        return;
+    }
 
-        alert(
-            'Keine Kartenpacks vorhanden.'
-        );
-
+    if(!Array.isArray(CARDS_DATA) || !CARDS_DATA.length){
+        alert('Die Kartendaten konnten nicht geladen werden.');
         return;
     }
 
     const randomCard =
         CARDS_DATA[
             Math.floor(
-                Math.random() *
-                CARDS_DATA.length
+                Math.random() * CARDS_DATA.length
             )
         ];
 
-    player.cardPacks--;
-  if(
-    !player.ownedCards
-){
-    player.ownedCards = [];
-}
+    // Ein Pack wird dauerhaft verbraucht, bevor die Karte angezeigt wird.
+    player.cardPacks = availablePacks - 1;
 
-if(
-    !player.ownedCards.includes(
-        randomCard.id
-    )
-){
-    player.ownedCards.push(
-        randomCard.id
-    );
-}
-
-    savePlayer(player);
-
-    updatePlayerUI();
-
-    if(
-        els.cardPackPopup &&
-        els.cardResult
-    ){
-
-    els.cardResult.innerHTML =
-`
-    <div
-        class="rarity-${randomCard.rarity}">
-
-        <h3>
-            🎉 Neue Karte!
-        </h3>
-
-        <strong>
-            ${randomCard.name}
-        </strong>
-
-        <br><br>
-
-        ${randomCard.rarity.toUpperCase()}
-
-    </div>
-`;
-
-        els.cardPackPopup
-            .classList.remove(
-                'hidden'
-            );
-
+    if(!Array.isArray(player.ownedCards)){
+        player.ownedCards = [];
     }
 
+    if(!player.ownedCards.includes(randomCard.id)){
+        player.ownedCards.push(randomCard.id);
+    }
+
+    savePlayer(player);
+    updatePlayerUI();
+
+    if(els.cardPackPopup && els.cardResult){
+        els.cardResult.innerHTML =
+        `
+            <div class="rarity-${randomCard.rarity}">
+                <h3>🎉 Neue Karte!</h3>
+                <strong>${randomCard.name}</strong>
+                <br><br>
+                ${randomCard.rarity.toUpperCase()}
+            </div>
+        `;
+
+        els.cardPackPopup.classList.remove('hidden');
+    }
 }
 function renderAchievements(){
 
@@ -768,71 +764,63 @@ function resetSessionQueue(){
   function updatePlayerUI(){
 
     const player = loadPlayer();
+    const level = Math.floor(player.xp / 100) + 1;
+    const totalPacksEarned = Math.floor(level / 5);
 
-    const level =
-        Math.floor(player.xp / 100) + 1;
-    const packsEarned =
-    Math.floor(level / 5);
+    /*
+     * Migration für ältere Spielstände:
+     * earnedCardPacks merkt sich dauerhaft, wie viele Packs insgesamt
+     * bereits für erreichte Level vergeben wurden. Dadurch werden
+     * geöffnete Packs nicht bei jedem UI-Update erneut gutgeschrieben.
+     */
+    if(!Number.isFinite(Number(player.earnedCardPacks))){
+        player.earnedCardPacks = totalPacksEarned;
+    }
 
-if(
-    packsEarned >
-    (player.cardPacks || 0)
-){
+    if(totalPacksEarned > player.earnedCardPacks){
+        const newlyEarned = totalPacksEarned - player.earnedCardPacks;
+        player.cardPacks = Math.max(0, Number(player.cardPacks) || 0) + newlyEarned;
+        player.earnedCardPacks = totalPacksEarned;
+    }
 
-    player.cardPacks =
-        packsEarned;
-
+    player.cardPacks = Math.max(0, Number(player.cardPacks) || 0);
     savePlayer(player);
-}
 
     if(level >= 2){
+        unlockAchievement('rising_star');
+    }
 
-    unlockAchievement(
-        'rising_star'
-    );
-
-}
-
-    const currentXP =
-        player.xp % 100;
-
-    const levelEl =
-        document.querySelector(
-            '.player-level'
-        );
-
-    const xpText =
-        document.querySelector(
-            '.xp-text'
-        );
-
-    const xpFill =
-        document.querySelector(
-            '.xp-fill'
-        );
+    const currentXP = player.xp % 100;
+    const levelEl = document.querySelector('.player-level');
+    const xpText = document.querySelector('.xp-text');
+    const xpFill = document.querySelector('.xp-fill');
 
     if(levelEl){
-        levelEl.textContent =
-            `⭐ Level ${level}`;
+        levelEl.textContent = `⭐ Level ${level}`;
     }
 
     if(xpText){
-        xpText.textContent =
-            `XP: ${currentXP} / 100`;
+        xpText.textContent = `XP: ${currentXP} / 100`;
     }
 
     if(xpFill){
-        xpFill.style.width =
-            `${currentXP}%`;
+        xpFill.style.width = `${currentXP}%`;
     }
-if(
-    els.cardPackCounter
-){
 
-    els.cardPackCounter.textContent =
-        player.cardPacks || 0;
+    if(els.cardPackCounter){
+        els.cardPackCounter.textContent = player.cardPacks;
+    }
 
-}
+    if(els.openPackBtn){
+        els.openPackBtn.disabled = player.cardPacks <= 0;
+        els.openPackBtn.textContent = player.cardPacks > 0
+            ? `🎴 Kartenpack öffnen (${player.cardPacks})`
+            : '🎴 Kein Kartenpack verfügbar';
+        els.openPackBtn.setAttribute(
+            'aria-disabled',
+            String(player.cardPacks <= 0)
+        );
+    }
 }
 function recentlyAsked(text){ return lastPrompts.some(t=> normalize(t)===normalize(text)); }
 function pushHistory(text){ lastPrompts.unshift(text); if(lastPrompts.length>2) lastPrompts.pop(); }
@@ -1115,7 +1103,10 @@ if(actualDirection === 'de2en'){
         from: 'de',
         to: 'en',
         prompt: randomSentence.de,
-        answer: randomSentence.en,
+        answer: combineAcceptedAnswers(
+            randomSentence.en,
+            randomSentence.acceptedEn
+        ),
         answered: false
     };
 
@@ -1126,7 +1117,10 @@ if(actualDirection === 'de2en'){
         from: 'en',
         to: 'de',
         prompt: randomSentence.en,
-        answer: randomSentence.de,
+        answer: combineAcceptedAnswers(
+            randomSentence.de,
+            randomSentence.acceptedDe
+        ),
         answered: false
     };
 

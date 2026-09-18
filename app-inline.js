@@ -22,7 +22,7 @@ const IRREGULAR_URL = './vocab/irregular_verbs_grade7.json';
 const GRAMMAR_URL = './vocab/grammar_tasks.json';
 const HINTS_URL = './vocab/hints.json';
 
-const SENTENCES_URL = './vocab/sentences.json';
+const SENTENCES_URL = './vocab/sentences.json?v=28';
 const BUILDER_URL =
     './vocab/sentence_builder.json';
 let SENTENCES_DATA = {};
@@ -824,6 +824,9 @@ function resetSessionQueue(){
 }
 function recentlyAsked(text){ return lastPrompts.some(t=> normalize(t)===normalize(text)); }
 function pushHistory(text){ lastPrompts.unshift(text); if(lastPrompts.length>2) lastPrompts.pop(); }
+function getTestSentenceId(){
+  return new URLSearchParams(window.location.search).get('testSentence');
+}
 function getTestIrregularId(){
   return new URLSearchParams(window.location.search).get('testIrregular');
 }
@@ -1054,7 +1057,12 @@ if(mode === 'sentences'){
 
         });
 
-  if(!sentencePool.length){
+    const testSentenceId = getTestSentenceId();
+    const testSentence = testSentenceId
+        ? allSentences.find(sentence => sentence.id === testSentenceId)
+        : null;
+
+  if(!sentencePool.length && !testSentence){
     return null;
 }
 
@@ -1080,7 +1088,7 @@ if(
 }
 
 const randomSentence =
-    sentenceQueue.shift();
+    testSentence || sentenceQueue.shift();
 
 const selectedDirection =
     els.sentenceDirectionSelect
@@ -1107,7 +1115,8 @@ if(actualDirection === 'de2en'){
             randomSentence.en,
             randomSentence.acceptedEn
         ),
-        answered: false
+        answered: false,
+        isTestQuestion: !!testSentence
     };
 
 }else{
@@ -1121,7 +1130,8 @@ if(actualDirection === 'de2en'){
             randomSentence.de,
             randomSentence.acceptedDe
         ),
-        answered: false
+        answered: false,
+        isTestQuestion: !!testSentence
     };
 
 }

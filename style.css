@@ -791,3 +791,108 @@ button.highlight{
 
     line-height:1.4;
 }
+
+/* Englisch-Coach v28: Karten und Erfolge klar trennen */
+.reward-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:14px;
+    margin-top:16px;
+    margin-bottom:22px;
+}
+.reward-card{
+    min-width:0;
+    padding:16px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.045);
+    border:1px solid rgba(255,255,255,0.1);
+}
+.reward-card-cards{ border-top:3px solid #7dc8ff; }
+.reward-card-achievements{ border-top:3px solid #ffd966; }
+.reward-card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:12px;
+}
+.reward-card-title{
+    font-size:18px;
+    font-weight:800;
+    color:#ffffff;
+}
+.reward-card-subtitle{
+    margin-top:4px;
+    color:#aab4c7;
+    font-size:13px;
+}
+.reward-card-actions{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px;
+}
+.reward-action-button{
+    width:100%;
+    min-height:44px;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:#1d2b44;
+    color:white;
+    font-weight:700;
+    white-space:normal;
+}
+.reward-action-button:hover:not(:disabled){ background:#273958; }
+.reward-action-button:disabled{
+    background:#172238;
+    color:#7f899c;
+    opacity:0.8;
+}
+.reward-card .achievement-list{
+    margin:14px 0 0;
+    padding-top:12px;
+}
+
+/* Smartphone-Optimierung */
+@media (max-width: 680px){
+    header{ padding:10px 12px; }
+    .toolbar{
+        align-items:stretch;
+        gap:8px;
+    }
+    .toolbar > label,
+    .toolbar > button{
+        width:100%;
+        box-sizing:border-box;
+    }
+    .toolbar select{
+        width:100%;
+        min-height:44px;
+        margin-top:4px;
+    }
+    main{ padding:10px; }
+    .card{
+        margin:14px auto;
+        padding:16px;
+        border-radius:16px;
+    }
+    .stats,
+    .block-actions,
+    .reset-actions,
+    .actions{ flex-wrap:wrap; }
+    .actions button{
+        flex:1 1 100%;
+        min-height:48px;
+    }
+    #promptText{
+        font-size:clamp(24px, 7vw, 32px);
+        overflow-wrap:anywhere;
+    }
+    .reward-grid{ grid-template-columns:1fr; }
+    .reward-card-actions{ grid-template-columns:1fr; }
+    .reward-action-button{ min-height:48px; }
+    .app-footer{
+        gap:10px;
+        flex-wrap:wrap;
+    }
+}

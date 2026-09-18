@@ -1626,7 +1626,13 @@
     "topic": "Away at school",
     "difficulty": 2,
     "en": "My roommate is very friendly.",
-    "de": "Mein Zimmergenosse ist sehr freundlich."
+    "de": "Mein Zimmergenosse ist sehr freundlich.",
+    "acceptedDe": [
+      "Mein Zimmergenosse ist sehr freundlich.",
+      "Meine Zimmergenossin ist sehr freundlich.",
+      "Mein Mitbewohner ist sehr freundlich.",
+      "Meine Mitbewohnerin ist sehr freundlich."
+    ]
   },
   {
     "id": "g7_u1_s002",
@@ -1779,7 +1785,13 @@
     "topic": "Away at school",
     "difficulty": 2,
     "en": "Do not copy your roommate’s vocabulary.",
-    "de": "Schreibe die Vokabeln deines Zimmergenossen nicht ab."
+    "de": "Schreibe die Vokabeln deines Zimmergenossen nicht ab.",
+    "acceptedDe": [
+      "Schreibe die Vokabeln deines Zimmergenossen nicht ab.",
+      "Schreibe die Vokabeln deiner Zimmergenossin nicht ab.",
+      "Schreibe die Vokabeln deines Mitbewohners nicht ab.",
+      "Schreibe die Vokabeln deiner Mitbewohnerin nicht ab."
+    ]
   },
   {
     "id": "g7_u1_s019",
@@ -2742,7 +2754,11 @@
     "topic": "My Life, Internet und Umwelt",
     "difficulty": 2,
     "en": "She suggests setting up a new webpage.",
-    "de": "Sie schlägt vor, eine neue Webseite einzurichten."
+    "de": "Sie schlägt vor, eine neue Webseite einzurichten.",
+    "acceptedDe": [
+      "Sie schlägt vor, eine neue Webseite einzurichten.",
+      "Sie schlägt vor, eine neue Internetseite einzurichten."
+    ]
   },
   {
     "id": "g7_u5_s006",
@@ -2769,7 +2785,12 @@
     "topic": "My Life, Internet und Umwelt",
     "difficulty": 2,
     "en": "Are we allowed to use this site?",
-    "de": "Dürfen wir diese Website benutzen?"
+    "de": "Dürfen wir diese Website benutzen?",
+    "acceptedDe": [
+      "Dürfen wir diese Website benutzen?",
+      "Dürfen wir diese Webseite benutzen?",
+      "Dürfen wir diese Internetseite benutzen?"
+    ]
   },
   {
     "id": "g7_u5_s009",
@@ -2778,7 +2799,12 @@
     "topic": "My Life, Internet und Umwelt",
     "difficulty": 2,
     "en": "This webpage has thousands of views.",
-    "de": "Diese Webseite hat Tausende Aufrufe."
+    "de": "Diese Webseite hat Tausende Aufrufe.",
+    "acceptedDe": [
+      "Diese Webseite hat Tausende Aufrufe.",
+      "Diese Website hat Tausende Aufrufe.",
+      "Diese Internetseite hat Tausende Aufrufe."
+    ]
   },
   {
     "id": "g7_u5_s010",

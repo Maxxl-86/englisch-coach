@@ -1,5 +1,5 @@
 // Vokabeltrainer – Auto-Repair Blocks + UX + Tippfehler-Diff + Lern-Hinweise (Beta)
-const APP_VERSION = 'v30'; // <--- AKTUALISIERT AUF V12
+const APP_VERSION = 'v31'; // <--- AKTUALISIERT AUF V12
 const UNIT_META = [
 // ... (UNIT_META bleibt unverändert) ...
 // ... (Hilfsfunktionen bleiben unverändert) ...
@@ -16,6 +16,8 @@ const LS_SYNC = 'vocab-central-meta';
 const LS_PLAYER = 'english-coach-player-v1';
 const LS_ACHIEVEMENTS =
     'english-coach-achievements-v1';
+const LS_LEARNING_STATS =
+    'english-coach-learning-stats-v1';
 const CENTRAL_URL = './vocab/vocab.json';
 const GRADE7_VOCAB_URL = './vocab/vocab_grade7.json';
 const IRREGULAR_URL = './vocab/irregular_verbs_grade7.json';
@@ -293,6 +295,138 @@ function saveAchievements(data){
     );
 
 }
+function createEmptyLearningStats(){
+    return {
+        version: 1,
+        updatedAt: null,
+        modes: {}
+    };
+}
+
+function loadLearningStats(){
+    try{
+        const data = JSON.parse(
+            localStorage.getItem(LS_LEARNING_STATS) || 'null'
+        );
+
+        if(!data || typeof data !== 'object'){
+            return createEmptyLearningStats();
+        }
+
+        if(!data.modes || typeof data.modes !== 'object'){
+            data.modes = {};
+        }
+
+        data.version = 1;
+        return data;
+
+    }catch(e){
+        return createEmptyLearningStats();
+    }
+}
+
+function saveLearningStats(data){
+    data.version = 1;
+    data.updatedAt = new Date().toISOString();
+    localStorage.setItem(
+        LS_LEARNING_STATS,
+        JSON.stringify(data)
+    );
+}
+
+function getLearningMode(question){
+    if(!question) return 'unknown';
+
+    if(question.type === 'sentence') return 'sentences';
+    if(question.type === 'builder') return 'builder';
+    if(question.type === 'irregular') return 'irregular';
+    if(question.type === 'grammar') return 'grammar';
+    return 'vocabulary';
+}
+
+function getLearningQuestionMeta(question){
+    const item = question?.item || {};
+    const selectedGrade = els.gradeSelect
+        ? els.gradeSelect.value
+        : 'unknown';
+
+    const grade = String(
+        item.grade ||
+        question.grade ||
+        (selectedGrade !== 'all' ? selectedGrade : 'unknown')
+    );
+
+    const unit = String(
+        item.unit ||
+        question.unit ||
+        question.origin ||
+        'unknown'
+    );
+
+    const itemId = String(
+        item.id ||
+        question.itemId ||
+        [
+            getLearningMode(question),
+            grade,
+            unit,
+            softNorm(question.prompt || '')
+        ].join('|')
+    );
+
+    return {
+        mode: getLearningMode(question),
+        grade,
+        unit,
+        itemId
+    };
+}
+
+function createLearningCounter(){
+    return {
+        attempted: 0,
+        correct: 0,
+        wrong: 0,
+        skipped: 0,
+        lastResult: null,
+        lastPracticedAt: null
+    };
+}
+
+function recordLearningOutcome(question, result){
+    if(!question || question.isTestQuestion) return;
+    if(!['correct','wrong','skipped'].includes(result)) return;
+
+    const meta = getLearningQuestionMeta(question);
+    const data = loadLearningStats();
+
+    data.modes[meta.mode] ||= {};
+    data.modes[meta.mode][meta.grade] ||= {};
+    data.modes[meta.mode][meta.grade][meta.unit] ||= {
+        ...createLearningCounter(),
+        items: {}
+    };
+
+    const unitStats = data.modes[meta.mode][meta.grade][meta.unit];
+    unitStats.items ||= {};
+    unitStats.items[meta.itemId] ||= createLearningCounter();
+    const itemStats = unitStats.items[meta.itemId];
+    const now = new Date().toISOString();
+
+    [unitStats, itemStats].forEach(stats => {
+        stats.attempted += 1;
+        stats[result] += 1;
+        stats.lastResult = result;
+        stats.lastPracticedAt = now;
+    });
+
+    saveLearningStats(data);
+}
+
+// Read-only access for diagnostics and the future learning dashboard.
+window.EnglishCoachLearningStats = {
+    getAll: () => loadLearningStats()
+};
 function exportSavegame(){
 
     const data = {
@@ -309,7 +443,10 @@ function exportSavegame(){
             loadAchievements(),
 
         stats:
-            loadStats()
+            loadStats(),
+
+        learningStats:
+            loadLearningStats()
 
     };
 
@@ -388,6 +525,14 @@ function importSavegame(file){
 
                     saveStats(
                         data.stats
+                    );
+
+                }
+
+                if(data.learningStats){
+
+                    saveLearningStats(
+                        data.learningStats
                     );
 
                 }
@@ -1114,6 +1259,10 @@ if(actualDirection === 'de2en'){
 
     currentQ = {
         type: 'sentence',
+        item: randomSentence,
+        itemId: randomSentence.id,
+        grade: randomSentence.grade,
+        unit: randomSentence.unit,
         from: 'de',
         to: 'en',
         prompt: randomSentence.de,
@@ -1129,6 +1278,10 @@ if(actualDirection === 'de2en'){
 
     currentQ = {
         type: 'sentence',
+        item: randomSentence,
+        itemId: randomSentence.id,
+        grade: randomSentence.grade,
+        unit: randomSentence.unit,
         from: 'en',
         to: 'de',
         prompt: randomSentence.en,
@@ -1197,6 +1350,10 @@ if(mode === 'builder'){
   currentQ = {
 
     type: 'builder',
+    item,
+    itemId: item.id,
+    grade: item.grade,
+    unit: item.unit,
 
     prompt:
         shuffled,
@@ -1369,6 +1526,10 @@ if(
     );
 }
 
+    recordLearningOutcome(
+        currentQ,
+        ok ? 'correct' : 'wrong'
+    );
 
     disableInputsAfterAnswer();
 
@@ -1395,7 +1556,10 @@ function handleShowAnswer(){
     currentQ.answered = true;
     els.feedback.innerHTML = `Lösung: <strong>${displayAnswer(currentQ.answer)}</strong>`;
     
-    // Keine Statistik-Änderung, da es ein Überspringen ist
+    recordLearningOutcome(
+        currentQ,
+        'skipped'
+    );
     
     disableInputsAfterAnswer();
     showHint(true); // Hint zeigen, da die Lösung bekannt ist

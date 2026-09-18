@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" sizes="192x192" href="icon-192.png">
   <link rel="icon" sizes="512x512" href="icon-512.png">
-  <link rel="stylesheet" href="style.css?v=28">
+  <link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
   <header>
@@ -47,32 +47,36 @@
   </select>
 </label>
       
-      <button id="installBtn" class="secondary hidden">📲 App installieren</button> 
-      <button id="exportSaveBtn" class="secondary">
-  💾 Spielstand exportieren
-</button>
-
-<label class="secondary import-save-label">
-  📥 Spielstand importieren
-  <input
-    id="importSaveInput"
-    type="file"
-    accept=".json"
-    class="hidden">
-</label>
-      
-      <label><input id="mcEnabled" type="checkbox"> Multiple Choice</label>
-      <label><input id="weightedEnabled" type="checkbox" checked> Fehlergewichtung</label>
-      <label><input id="hintsEnabled" type="checkbox"> Lern‑Hinweise (Beta)</label>
-      <label>Preset:
-        <select id="presetSelect">
-          <option value="custom">(individuell)</option>
-          <option value="u1_2">U1–U2</option>
-          <option value="u1_3">U1–U3</option>
-          <option value="u3_4">U3–U4</option>
-          <option value="u1_6">U1–U6</option>
-        </select>
-      </label>
+      <details id="advancedSettings" class="advanced-settings">
+        <summary>⚙️ Weitere Einstellungen</summary>
+        <div class="advanced-settings-grid">
+          <label id="mcControl" class="setting-control">
+            <input id="mcEnabled" type="checkbox"> Multiple Choice
+          </label>
+          <label id="weightedControl" class="setting-control">
+            <input id="weightedEnabled" type="checkbox" checked> Fehlergewichtung
+          </label>
+          <label id="hintsControl" class="setting-control">
+            <input id="hintsEnabled" type="checkbox"> Lern-Hinweise (Beta)
+          </label>
+          <label id="presetControl" class="setting-control">
+            Preset:
+            <select id="presetSelect">
+              <option value="custom">(individuell)</option>
+              <option value="u1_2">U1-U2</option>
+              <option value="u1_3">U1-U3</option>
+              <option value="u3_4">U3-U4</option>
+              <option value="u1_6">U1-U6</option>
+            </select>
+          </label>
+          <button id="installBtn" class="secondary hidden">📲 App installieren</button>
+          <button id="exportSaveBtn" class="secondary">💾 Spielstand exportieren</button>
+          <label class="secondary import-save-label setting-control">
+            📥 Spielstand importieren
+            <input id="importSaveInput" type="file" accept=".json" class="hidden">
+          </label>
+        </div>
+      </details>
     </div>
   </header>
   <main id="app-root">
@@ -238,7 +242,7 @@
         .catch(console.error);
     }
   </script>
-<script src="app-inline.js?v=28"></script>
+<script src="app-inline.js?v=29"></script>
 <footer class="app-footer">
     <div class="tip-jar">
         <a href="https://paypal.me/Maxxl86" target="_blank" rel="noopener noreferrer" class="tip-button">

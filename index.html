@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" sizes="192x192" href="icon-192.png">
   <link rel="icon" sizes="512x512" href="icon-512.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
   <header>
@@ -102,56 +102,42 @@
     XP: 0 / 100
 </div>
 
-<div class="future-rewards">
-
-   🎴 Kartenpacks:
-  <button
-    id="showCollectionBtn"
-    class="achievement-toggle">
-
-    📚 Sammlung
-
-</button>
-<span id="cardPackCounter">
-    0
-</span>
-  <button
-    id="openPackBtn"
-    class="achievement-toggle">
-
-    🎴 Kartenpack öffnen
-
-</button>
-
-    &nbsp;&nbsp;&nbsp;
-
-    🏆 Erfolge:
-<span id="achievementCounter">
-    0 / 0
-</span>
-
-</div>
-
-<div class="achievement-list">
-
-    <button
-        id="achievementToggle"
-        class="achievement-toggle">
-
-        🏆 Erfolge anzeigen
-
-    </button>
-
-    <div
-        id="achievementListWrapper"
-        class="hidden">
-
-        <h3>🏆 Erfolge</h3>
-
-        <div id="achievementList"></div>
-
+<div class="reward-grid">
+  <section class="reward-card reward-card-cards" aria-labelledby="cardsHeading">
+    <div class="reward-card-header">
+      <div>
+        <div id="cardsHeading" class="reward-card-title">🎴 Karten</div>
+        <div class="reward-card-subtitle">
+          Ungeöffnete Packs: <strong id="cardPackCounter">0</strong>
+        </div>
+      </div>
     </div>
+    <div class="reward-card-actions">
+      <button id="showCollectionBtn" class="reward-action-button">
+        📚 Sammlung
+      </button>
+      <button id="openPackBtn" class="reward-action-button">
+        🎴 Kartenpack öffnen
+      </button>
+    </div>
+  </section>
 
+  <section class="reward-card reward-card-achievements" aria-labelledby="achievementsHeading">
+    <div class="reward-card-header">
+      <div>
+        <div id="achievementsHeading" class="reward-card-title">🏆 Erfolge</div>
+        <div class="reward-card-subtitle">
+          Freigeschaltet: <strong id="achievementCounter">0 / 0</strong>
+        </div>
+      </div>
+    </div>
+    <button id="achievementToggle" class="reward-action-button">
+      🏆 Erfolge anzeigen
+    </button>
+    <div id="achievementListWrapper" class="achievement-list hidden">
+      <div id="achievementList"></div>
+    </div>
+  </section>
 </div>
 
     <div id="exerciseType" class="exercise-type">
@@ -252,7 +238,7 @@
         .catch(console.error);
     }
   </script>
-<script src="app-inline.js?v=27"></script>
+<script src="app-inline.js?v=28"></script>
 <footer class="app-footer">
     <div class="tip-jar">
         <a href="https://paypal.me/Maxxl86" target="_blank" rel="noopener noreferrer" class="tip-button">

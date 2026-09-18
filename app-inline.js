@@ -1,5 +1,5 @@
 // Vokabeltrainer – Auto-Repair Blocks + UX + Tippfehler-Diff + Lern-Hinweise (Beta)
-const APP_VERSION = 'v28'; // <--- AKTUALISIERT AUF V12
+const APP_VERSION = 'v29'; // <--- AKTUALISIERT AUF V12
 const UNIT_META = [
 // ... (UNIT_META bleibt unverändert) ...
 // ... (Hilfsfunktionen bleiben unverändert) ...
@@ -158,6 +158,12 @@ els.presetSelect = $("presetSelect"); els.modeSelect = $("modeSelect"); els.grad
 els.sentenceDirectionSelect = $("sentenceDirectionSelect");
 
   els.weightedEnabled = $("weightedEnabled"); els.hintsEnabled = $("hintsEnabled");
+  els.sentenceDirectionLabel = $("sentenceDirectionLabel");
+  els.mcControl = $("mcControl");
+  els.weightedControl = $("weightedControl");
+  els.hintsControl = $("hintsControl");
+  els.presetControl = $("presetControl");
+  els.advancedSettings = $("advancedSettings");
   els.nextBtn = $("nextBtn"); els.checkBtn = $("checkBtn"); els.promptLabel = $("promptLabel"); els.exerciseType = $("exerciseType");
   els.exerciseDescription = $("exerciseDescription");
   els.promptText = $("promptText");
@@ -1747,6 +1753,39 @@ els.checkBtn.onclick =
     }
 }
 
+function setControlVisibility(element, visible){
+  if(!element) return;
+  element.classList.toggle('hidden', !visible);
+}
+
+function updateModeControls(){
+  if(!els.modeSelect) return;
+
+  const mode = els.modeSelect.value;
+  const isVocab = mode === 'de2en' || mode === 'en2de';
+  const isSentence = mode === 'sentences';
+  const isGrammar = mode === 'grammar';
+
+  setControlVisibility(els.sentenceDirectionLabel, isSentence);
+  setControlVisibility(els.mcControl, isVocab || isGrammar);
+  setControlVisibility(els.weightedControl, isVocab);
+  setControlVisibility(els.hintsControl, isVocab);
+  setControlVisibility(els.presetControl, true);
+
+  if(!isVocab && els.weightedEnabled){
+    els.weightedEnabled.checked = false;
+  }
+
+  if(!isVocab && els.hintsEnabled){
+    els.hintsEnabled.checked = false;
+    els.hintArea && els.hintArea.classList.add('hidden');
+  }
+
+  if(!isVocab && !isGrammar && els.mcEnabled){
+    els.mcEnabled.checked = false;
+  }
+}
+
 function bindControls(){ 
     // ... (Andere Controls bleiben unverändert) ...
   els.nextBtn &&
@@ -1868,6 +1907,7 @@ els.importSaveInput &&
     els.clearAllBtn && els.clearAllBtn.addEventListener('click', ()=>{ els.blockChecklist.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.checked=false ); syncActiveBlockIds(); }); 
 els.modeSelect && els.modeSelect.addEventListener('change', () => {
 
+    updateModeControls();
     currentQ = null;
     grammarQueue = [];
     grammarQueueKey = '';
@@ -2076,6 +2116,7 @@ function displayVersion() {
     ensureBlocksSection(); 
     bindEls(); 
     bindControls(); 
+    updateModeControls();
     await initCentralSync(); 
     renderChecklist(); 
     initStats(); 
